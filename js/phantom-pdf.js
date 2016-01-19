@@ -79,6 +79,7 @@ function getPaperSize(pageOptions) {
     if (pageOptions.footerContent || pageOptions.footerHeight) {
         var footerHeight = pageOptions.footerHeight || defaultPageSize.footer.height;
         var footerContent = pageOptions.footerContent;
+        prepareContent(footerContent);
         paperSize.footer = renderTemplate(footerHeight, footerContent);
     }
 
