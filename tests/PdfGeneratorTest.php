@@ -41,7 +41,7 @@ class PdfGeneratorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \PhantomPdf\Exception\PhantomPdfException
+     * @expectedException \PhantomPdf\PhantomPdfException
      * @expectedExceptionMessage /wrong/binary
      */
     public function testExceptionBinaryDoesNotExist()
