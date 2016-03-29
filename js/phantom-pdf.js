@@ -1,11 +1,24 @@
 var fs = require('fs');
 var system = require('system');
 var args = system.args;
+var defaultPageSize = {
+    format: 'A4',
+    orientation: 'portrait',
+    margin: '1cm',
+    header: {
+        content: '',
+        height: '1cm'
+    },
+    footer: {
+        content: '',
+        height: '1cm'
+    }
+};
 
 if (args.length < 3) {
 
     console.log('Usage: phantomjs phantom-pdf.js $pageOptionJson');
-    console.log('$pageOptionJson can contains following json-attributes:');
+    console.log('$pageOptionJson can contains following json-attributes: ' + JSON.stringify(defaultPageSize));
 
     phantom.exit();
 
@@ -21,19 +34,6 @@ if (args.length < 3) {
     var dirName = targetPath.substring(0, targetPath.lastIndexOf('/'));
     var pageNumPlaceholder = '#pageNum';
     var totalPagesPlaceholder = '#numPages';
-    var defaultPageSize = {
-        format: 'A4',
-        orientation: 'portrait',
-        margin: '1cm',
-        header: {
-            content: '',
-            height: '1cm'
-        },
-        footer: {
-            content: '',
-            height: '1cm'
-        }
-    };
 
     if (!fs.isWritable(dirName)) {
         printErrorAndExit('Path ' + dirName + ' is not writable.', 1);
@@ -57,7 +57,6 @@ if (args.length < 3) {
                     printErrorAndExit('Unable to load file.', 1)
                 } else {
                     page.render(targetPath, format);
-                    console.log('SUCCESS');
                     phantom.exit(0);
                 }
             });
@@ -72,12 +71,16 @@ function getPaperSize(pageOptions) {
 
     if (pageOptions.headerContent || pageOptions.headerHeight) {
         var headerHeight = pageOptions.headerHeight || defaultPageSize.header.height;
-        paperSize.header = renderTemplate(headerHeight, pageOptions.headerContent);
+        var headerContent = pageOptions.headerContent;
+        prepareContent(headerContent);
+        paperSize.header = renderTemplate(headerHeight, headerContent);
     }
 
     if (pageOptions.footerContent || pageOptions.footerHeight) {
         var footerHeight = pageOptions.footerHeight || defaultPageSize.footer.height;
-        paperSize.footer = renderTemplate(footerHeight, pageOptions.footerContent);
+        var footerContent = pageOptions.footerContent;
+        prepareContent(footerContent);
+        paperSize.footer = renderTemplate(footerHeight, footerContent);
     }
 
     if (pageOptions.format) {
@@ -127,3 +130,9 @@ function printErrorAndExit(message, exitCode) {
     system.stderr.write(message);
     phantom.exit(exitCode);
 }
+
+function prepareContent(content) {
+    var contentDom = document.createElement('html');
+    contentDom.innerHTML = content;
+}
+

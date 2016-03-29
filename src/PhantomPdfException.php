@@ -1,6 +1,6 @@
 <?php
 
-namespace PhantomPdf\Exception;
+namespace PhantomPdf;
 
 class PhantomPdfException extends \Exception
 {

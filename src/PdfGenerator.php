@@ -2,7 +2,6 @@
 
 namespace PhantomPdf;
 
-use PhantomPdf\Exception\PhantomPdfException;
 use Symfony\Component\Process\Process;
 
 class PdfGenerator
@@ -16,9 +15,14 @@ class PdfGenerator
     private $binaryPath;
 
     /**
+     * @var Base64ConverterInterface
+     */
+    private $base64Converter;
+
+    /**
      * @var int
      */
-    private $timeout = null;
+    private $timeout = 120;
 
     /**
      * @var string
@@ -41,6 +45,7 @@ class PdfGenerator
     public function __construct($binaryPath)
     {
         $this->binaryPath = $binaryPath;
+        $this->base64Converter = new Base64Converter();
     }
 
     /**
@@ -54,6 +59,9 @@ class PdfGenerator
         $this->createFile($tmpFilePath, $html);
 
         $preparedOptions = $this->prepareOptions($options);
+
+        $preparedOptions = $this->convertImagesToBase64($preparedOptions, 'headerContent');
+        $preparedOptions = $this->convertImagesToBase64($preparedOptions, 'footerContent');
 
         $this->convertToPdf($tmpFilePath, $targetPath, $preparedOptions);
     }
@@ -72,6 +80,10 @@ class PdfGenerator
         $tmpPdfFilePath = $this->createTempFilePath(self::PDF_EXTENSION);
 
         $preparedOptions = $this->prepareOptions($options);
+
+        $preparedOptions = $this->convertImagesToBase64($preparedOptions, 'headerContent');
+        $preparedOptions = $this->convertImagesToBase64($preparedOptions, 'footerContent');
+
         $this->convertToPdf($tmpHtmlFilePath, $tmpPdfFilePath, $preparedOptions);
 
         return file_get_contents($tmpPdfFilePath);
@@ -95,6 +107,14 @@ class PdfGenerator
     }
 
     /**
+     * @param int $timeout
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = $timeout;
+    }
+
+    /**
      * @param $commandLineOption
      */
     public function setCommandLineOption($commandLineOption)
@@ -111,6 +131,15 @@ class PdfGenerator
             $this->setCommandLineOption($commandLineOption);
         }
     }
+
+    /**
+     * @param Base64ConverterInterface $base64Converter
+     */
+    public function setBase64Converter(Base64ConverterInterface $base64Converter)
+    {
+        $this->base64Converter = $base64Converter;
+    }
+
 
     /**
      * @param string $tempDirectory
@@ -186,14 +215,14 @@ class PdfGenerator
         $process->run();
         $error = $process->getErrorOutput();
 
-        if ($error) {
+        if ($error !== null) {
             throw new PhantomPdfException($error);
         }
     }
 
     /**
-     * @param $resourcePath
-     * @param $targetPath
+     * @param string $resourcePath
+     * @param string $targetPath
      * @param array $options
      *
      * @return string
@@ -229,4 +258,20 @@ class PdfGenerator
         return $this->tempDirectory;
     }
 
+    /**
+     * @param array $options
+     * @param string $contentIndex
+     *
+     * @return array
+     */
+    protected function convertImagesToBase64(array $options, $contentIndex)
+    {
+        if (array_key_exists($contentIndex, $options)) {
+            $options[$contentIndex] = $this->base64Converter
+                ->convertImageSrcTo64Base($options[$contentIndex])
+            ;
+        }
+
+        return $options;
+    }
 }
