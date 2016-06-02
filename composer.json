@@ -1,5 +1,5 @@
 {
-  "name": "tobi812/phantom-pdf",
+  "name": "project-a/phantom-pdf",
   "description": "",
   "keywords": [
     "phantom.js", "pdf"
@@ -7,7 +7,7 @@
   "authors": [
     {
       "name": "Tobias Rosenstock",
-      "email": "tobi.rosenstock@gmail.com"
+      "email": "tobias.rosenstock@project-a.com"
     }
   ],
   "require": {
