@@ -15,7 +15,7 @@ Download PhantomJS: http://phantomjs.org/download.html
 Install via Composer
 
 ```
-composer require tobi812/phantom-pdf
+composer require project-a/phantom-pdf
 
 ```
 
