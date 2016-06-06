@@ -1,5 +1,7 @@
 # phantom-pdf
 
+[![Build Status](https://img.shields.io/travis/project-a/phantom-pdf/master.svg?style=flat-square)](https://travis-ci.org/project-a/phantom-pdf)
+
 ## Requirements
 
 PHP 5.4
