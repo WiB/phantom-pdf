@@ -39,7 +39,6 @@ if (args.length < 3) {
         printErrorAndExit('Path ' + dirName + ' is not writable.', 1);
     } else {
         try {
-
             if (pageOptions.pageNumPlaceholder) {
                 pageNumPlaceholder = pageOptions.pageNumPlaceholder;
             }
@@ -69,16 +68,16 @@ if (args.length < 3) {
 function getPaperSize(pageOptions) {
     var paperSize = defaultPageSize;
 
-    if (pageOptions.headerContent || pageOptions.headerHeight) {
+    if (pageOptions.headerPath || pageOptions.headerHeight) {
         var headerHeight = pageOptions.headerHeight || defaultPageSize.header.height;
-        var headerContent = pageOptions.headerContent;
+        var headerContent = fs.read(pageOptions.headerPath);
         prepareContent(headerContent);
         paperSize.header = renderTemplate(headerHeight, headerContent);
     }
 
-    if (pageOptions.footerContent || pageOptions.footerHeight) {
+    if (pageOptions.footerPath || pageOptions.footerHeight) {
         var footerHeight = pageOptions.footerHeight || defaultPageSize.footer.height;
-        var footerContent = pageOptions.footerContent;
+        var footerContent = fs.read(pageOptions.footerPath);
         prepareContent(footerContent);
         paperSize.footer = renderTemplate(footerHeight, footerContent);
     }

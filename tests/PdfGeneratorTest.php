@@ -4,14 +4,13 @@ namespace PhantomPdf\Test;
 
 use PhantomPdf\PdfGenerator;
 
-
 class PdfGeneratorTest extends \PHPUnit_Framework_TestCase
 {
+
     /**
-     * @var PdfGenerator
+     * @var \PhantomPdf\PdfGenerator
      */
     private $pdfGenerator;
-
 
     public function setUp()
     {
@@ -43,12 +42,15 @@ class PdfGeneratorTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \PhantomPdf\PhantomPdfException
      * @expectedExceptionMessage /wrong/binary
+     *
+     * @return void
      */
     public function testExceptionBinaryDoesNotExist()
     {
         $wrongBinaryPath = '/wrong/binary';
         $this->setExpectedException(
-            'Exception', $wrongBinaryPath
+            'Exception',
+            $wrongBinaryPath
         );
 
         $htmlMock = $this->getContentMock();
@@ -62,7 +64,7 @@ class PdfGeneratorTest extends \PHPUnit_Framework_TestCase
      */
     protected function getContentMock()
     {
-        return '<h1>Test</h1>';
+        return file_get_contents(__DIR__ . '/template/test.html');
     }
 
 }

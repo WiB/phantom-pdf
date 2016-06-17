@@ -4,6 +4,7 @@ namespace PhantomPdf;
 
 class Options
 {
+
     const ORIENTATION_PORTRAIT = 'portrait';
     const ORIENTATION_LANDSCAPE = 'landscape';
 
@@ -40,12 +41,22 @@ class Options
     /**
      * @var string
      */
+    private $headerPath;
+
+    /**
+     * @var string
+     */
     private $headerHeight;
 
     /**
      * @var string
      */
     private $footerContent;
+
+    /**
+     * @var string
+     */
+    private $footerPath;
 
     /**
      * @var string
@@ -61,6 +72,11 @@ class Options
      * @var string
      */
     private $totalPagesPlaceholder;
+
+    /**
+     * @var bool
+     */
+    private $convertImagesToBase64 = true;
 
     /**
      * @return array
@@ -80,17 +96,25 @@ class Options
 
     /**
      * @param string $format
+     *
+     * @return void
      */
     public function setFormat($format)
     {
         $this->format = $format;
     }
 
+    /**
+     * @return void
+     */
     public function setOrientationPortrait()
     {
         $this->orientation = self::ORIENTATION_PORTRAIT;
     }
 
+    /**
+     * @return void
+     */
     public function setOrientationLandscape()
     {
         $this->orientation = self::ORIENTATION_LANDSCAPE;
@@ -98,6 +122,8 @@ class Options
 
     /**
      * @param array $customHeaders
+     *
+     * @return void
      */
     public function setCustomHeaders(array $customHeaders)
     {
@@ -106,6 +132,8 @@ class Options
 
     /**
      * @param int $zoomFactor
+     *
+     * @return void
      */
     public function setZoomFactor($zoomFactor)
     {
@@ -115,6 +143,8 @@ class Options
     /**
      * @param int $width
      * @param string $unit
+     *
+     * @return void
      */
     public function setMargin($width, $unit = 'cm')
     {
@@ -123,6 +153,8 @@ class Options
 
     /**
      * @param string $headerContent
+     *
+     * @return void
      */
     public function setHeaderContent($headerContent)
     {
@@ -130,8 +162,18 @@ class Options
     }
 
     /**
+     * @return string
+     */
+    public function getHeaderContent()
+    {
+        return $this->headerContent;
+    }
+
+    /**
      * @param int $width
      * @param string $unit
+     *
+     * @return void
      */
     public function setHeaderHeight($width, $unit = 'cm')
     {
@@ -140,6 +182,8 @@ class Options
 
     /**
      * @param string $footerContent
+     *
+     * @return void
      */
     public function setFooterContent($footerContent)
     {
@@ -147,8 +191,18 @@ class Options
     }
 
     /**
+     * @return string
+     */
+    public function getFooterContent()
+    {
+        return $this->footerContent;
+    }
+
+    /**
      * @param int $width
      * @param string $unit
+     *
+     * @return void
      */
     public function setFooterHeight($width, $unit = 'cm')
     {
@@ -157,6 +211,8 @@ class Options
 
     /**
      * @param string $pageNumPlaceholder
+     *
+     * @return void
      */
     public function setPageNumPlaceholder($pageNumPlaceholder)
     {
@@ -165,9 +221,66 @@ class Options
 
     /**
      * @param string $totalPagesPlaceholder
+     *
+     * @return void
      */
     public function setTotalPagesPlaceholder($totalPagesPlaceholder)
     {
         $this->totalPagesPlaceholder = $totalPagesPlaceholder;
     }
+
+    /**
+     * @return bool
+     */
+    public function getConvertImagesToBase64()
+    {
+        return $this->convertImagesToBase64;
+    }
+
+    /**
+     * @param bool $convertImagesToBase64
+     *
+     * @return void
+     */
+    public function setConvertImagesToBase64($convertImagesToBase64)
+    {
+        $this->convertImagesToBase64 = $convertImagesToBase64;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHeaderPath()
+    {
+        return $this->headerPath;
+    }
+
+    /**
+     * @param string $headerPath
+     *
+     * @return void
+     */
+    public function setHeaderPath($headerPath)
+    {
+        $this->headerPath = $headerPath;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFooterPath()
+    {
+        return $this->footerPath;
+    }
+
+    /**
+     * @param string $footerPath
+     *
+     * @return void
+     */
+    public function setFooterPath($footerPath)
+    {
+        $this->footerPath = $footerPath;
+    }
+
 }

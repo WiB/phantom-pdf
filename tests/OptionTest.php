@@ -6,6 +6,7 @@ use PhantomPdf\Options;
 
 class OptionTest extends \PHPUnit_Framework_TestCase
 {
+
     public function testOptionsToArray()
     {
         $options = new Options();
@@ -19,6 +20,7 @@ class OptionTest extends \PHPUnit_Framework_TestCase
             'margin' => '1cm',
             'orientation' => 'landscape',
             'zoomFactor' => 1,
+            'convertImagesToBase64' => true,
         ];
 
         $this->assertEquals($expectedOptionArray, $actualOptionArray);
@@ -33,8 +35,10 @@ class OptionTest extends \PHPUnit_Framework_TestCase
             'format' => 'A4',
             'orientation' => 'portrait',
             'zoomFactor' => 1,
+            'convertImagesToBase64' => true,
         ];
 
         $this->assertEquals($expectedOptionArray, $actualOptionArray);
     }
+
 }

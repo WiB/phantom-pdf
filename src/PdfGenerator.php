@@ -6,6 +6,7 @@ use Symfony\Component\Process\Process;
 
 class PdfGenerator
 {
+
     const HTML_EXTENSION = 'html';
     const PDF_EXTENSION = 'pdf';
 
@@ -15,7 +16,7 @@ class PdfGenerator
     private $binaryPath;
 
     /**
-     * @var Base64ConverterInterface
+     * @var \PhantomPdf\Base64ConverterInterface
      */
     private $base64Converter;
 
@@ -51,40 +52,36 @@ class PdfGenerator
     /**
      * @param string $html
      * @param string $targetPath
-     * @param array|Options|null options
+     * @param \PhantomPdf\Options|null $options
+     * @throws \PhantomPdf\PhantomPdfException
+     *
+     * @return void
      */
-    public function renderFileFromHtml($html, $targetPath, $options = null)
+    public function renderFileFromHtml($html, $targetPath, Options $options = null)
     {
         $tmpFilePath = $this->createTempFilePath(self::HTML_EXTENSION);
         $this->createFile($tmpFilePath, $html);
 
-        $preparedOptions = $this->prepareOptions($options);
+        if ($options === null) {
+            $options = new Options();
+        }
 
-        $preparedOptions = $this->convertImagesToBase64($preparedOptions, 'headerContent');
-        $preparedOptions = $this->convertImagesToBase64($preparedOptions, 'footerContent');
+        $options = $this->prepareOptions($options);
 
-        $this->convertToPdf($tmpFilePath, $targetPath, $preparedOptions);
+        $this->convertToPdf($tmpFilePath, $targetPath, $options);
     }
 
     /**
      * @param string $html
-     * @param array|Options|null options
+     * @param \PhantomPdf\Options|null $options
      *
      * @return string
      */
-    public function renderOutputFromHtml($html, $options = null)
+    public function renderOutputFromHtml($html, Options $options = null)
     {
-        $tmpHtmlFilePath = $this->createTempFilePath(self::HTML_EXTENSION);
-        $this->createFile($tmpHtmlFilePath, $html);
-
         $tmpPdfFilePath = $this->createTempFilePath(self::PDF_EXTENSION);
 
-        $preparedOptions = $this->prepareOptions($options);
-
-        $preparedOptions = $this->convertImagesToBase64($preparedOptions, 'headerContent');
-        $preparedOptions = $this->convertImagesToBase64($preparedOptions, 'footerContent');
-
-        $this->convertToPdf($tmpHtmlFilePath, $tmpPdfFilePath, $preparedOptions);
+        $this->renderFileFromHtml($html, $tmpPdfFilePath, $options);
 
         return file_get_contents($tmpPdfFilePath);
     }
@@ -100,6 +97,8 @@ class PdfGenerator
 
     /**
      * @param string $binaryPath
+     *
+     * @return void
      */
     public function setBinaryPath($binaryPath)
     {
@@ -108,6 +107,8 @@ class PdfGenerator
 
     /**
      * @param int $timeout
+     *
+     * @return void
      */
     public function setTimeout($timeout)
     {
@@ -115,7 +116,9 @@ class PdfGenerator
     }
 
     /**
-     * @param $commandLineOption
+     * @param string $commandLineOption
+     *
+     * @return void
      */
     public function setCommandLineOption($commandLineOption)
     {
@@ -124,6 +127,8 @@ class PdfGenerator
 
     /**
      * @param array $commandLineOptions
+     *
+     * @return void
      */
     public function setCommandLineOptions(array $commandLineOptions)
     {
@@ -133,7 +138,9 @@ class PdfGenerator
     }
 
     /**
-     * @param Base64ConverterInterface $base64Converter
+     * @param \PhantomPdf\Base64ConverterInterface $base64Converter
+     *
+     * @return void
      */
     public function setBase64Converter(Base64ConverterInterface $base64Converter)
     {
@@ -143,6 +150,8 @@ class PdfGenerator
 
     /**
      * @param string $tempDirectory
+     *
+     * @return void
      */
     public function setTempDirectory($tempDirectory)
     {
@@ -152,6 +161,8 @@ class PdfGenerator
     /**
      * @param string $content
      * @param string $filePath
+     *
+     * @return void
      */
     protected function createFile($filePath, $content)
     {
@@ -159,7 +170,7 @@ class PdfGenerator
     }
 
     /**
-     * @param $extension
+     * @param string $extension
      *
      * @return string
      */
@@ -181,29 +192,14 @@ class PdfGenerator
     }
 
     /**
-     * @param null $options
+     * @param string $resourcePath
+     * @param string $targetPath
+     * @param \PhantomPdf\Options $options
+     * @throws \PhantomPdf\PhantomPdfException
      *
-     * @return array|null
+     * @return void
      */
-    protected function prepareOptions($options = null)
-    {
-        if (is_array($options)) {
-            return $options;
-        } elseif ($options instanceof Options) {
-            return $options->toArray();
-        } else {
-            return [];
-        }
-    }
-
-    /**
-     * @param $resourcePath
-     * @param $targetPath
-     * @param array $options
-     *
-     * @throws PhantomPdfException
-     */
-    protected function convertToPdf($resourcePath, $targetPath, array $options)
+    protected function convertToPdf($resourcePath, $targetPath, Options $options)
     {
         $command = $this->createCommand($resourcePath, $targetPath, $options);
         $process = new Process($command);
@@ -216,30 +212,34 @@ class PdfGenerator
         $error = $process->getErrorOutput();
 
         if ($error !== null) {
-            throw new PhantomPdfException($error);
+            throw new PhantomPdfException($error . ' ' . $process->getExitCodeText());
         }
     }
 
     /**
      * @param string $resourcePath
      * @param string $targetPath
-     * @param array $options
+     * @param \PhantomPdf\Options $options
      *
      * @return string
      */
-    protected function createCommand($resourcePath, $targetPath, array $options)
+    protected function createCommand($resourcePath, $targetPath, Options $options)
     {
         $commandLineOptions = implode(' ', $this->commandLineOptions);
-        $encodedOptions = escapeshellarg(json_encode($options));
 
-        return implode(' ', [
-            $this->binaryPath,
-            $commandLineOptions,
-            __DIR__ . '/../js/phantom-pdf.js',
-            $resourcePath,
-            $targetPath,
-            $encodedOptions
-        ]);
+        $optionArray = $options->toArray();
+        $encodedOptions = escapeshellarg(json_encode($optionArray));
+
+        $commandSegments = [];
+
+        $commandSegments[] = $this->binaryPath;
+        $commandSegments[] = $commandLineOptions;
+        $commandSegments[] = __DIR__ . '/../js/phantom-pdf.js';
+        $commandSegments[] = $resourcePath;
+        $commandSegments[] = $targetPath;
+        $commandSegments[] = $encodedOptions;
+
+        return implode(' ', $commandSegments);
     }
 
     /**
@@ -259,19 +259,76 @@ class PdfGenerator
     }
 
     /**
-     * @param array $options
-     * @param string $contentIndex
+     * @param string $htmlString
      *
-     * @return array
+     * @return string
      */
-    protected function convertImagesToBase64(array $options, $contentIndex)
+    protected function convertImagesToBase64($htmlString)
     {
-        if (array_key_exists($contentIndex, $options)) {
-            $options[$contentIndex] = $this->base64Converter
-                ->convertImageSrcTo64Base($options[$contentIndex])
-            ;
+        if (!$htmlString) {
+            return $htmlString;
+        }
+
+        return $this->base64Converter->convertImageSrcTo64Base($htmlString);
+    }
+
+    /**
+     * @param \PhantomPdf\Options $options
+     *
+     * @return \PhantomPdf\Options
+     */
+    protected function prepareHeaderAndFooter(Options $options)
+    {
+        if ($options->getHeaderContent() !== null) {
+            $headerPath = $this->putContentToTmpFile($options->getHeaderContent());
+
+            $options->setHeaderPath($headerPath);
+            $options->setHeaderContent(null);
+        }
+
+        if ($options->getFooterContent() !== null) {
+            $footerPath = $this->putContentToTmpFile($options->getFooterContent());
+
+            $options->setFooterPath($footerPath);
+            $options->setFooterContent(null);
         }
 
         return $options;
     }
+
+    /**
+     * @param string $content
+     *
+     * @return string
+     */
+    protected function putContentToTmpFile($content)
+    {
+        $path = $this->createTempFilePath(self::HTML_EXTENSION);
+
+        $this->createFile($path, $content);
+
+        return $path;
+    }
+
+    /**
+     * @param \PhantomPdf\Options $options
+     *
+     * @return \PhantomPdf\Options
+     */
+    protected function prepareOptions(Options $options)
+    {
+        if ($options->getConvertImagesToBase64() === true) {
+
+            $preparedHeaderContent = $this->convertImagesToBase64($options->getHeaderContent());
+            $preparedFooterContent = $this->convertImagesToBase64($options->getFooterContent());
+
+            $options->setHeaderContent($preparedHeaderContent);
+            $options->setFooterContent($preparedFooterContent);
+        }
+
+        $options = $this->prepareHeaderAndFooter($options);
+
+        return $options;
+    }
+
 }

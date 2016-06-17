@@ -4,6 +4,7 @@ namespace PhantomPdf;
 
 class Base64Converter implements Base64ConverterInterface
 {
+
     const IMG = 'img';
     const SRC = 'src';
     const EXTENSION = 'extension';
@@ -16,6 +17,7 @@ class Base64Converter implements Base64ConverterInterface
         self::JPG,
         self::GIF,
         self::PNG,
+        self::SVG,
     ];
 
     /**
@@ -25,11 +27,12 @@ class Base64Converter implements Base64ConverterInterface
     const JPG = 'jpg';
     const GIF = 'gif';
     const BMP = 'bmp';
+    const SVG = 'svg';
 
     /**
      * @param string $htmlString
      *
-     * @throws PhantomPdfException
+     * @throws \PhantomPdf\PhantomPdfException
      * @return string
      */
     public function convertImageSrcTo64Base($htmlString)
@@ -76,4 +79,5 @@ class Base64Converter implements Base64ConverterInterface
             $sourceBase64encoded
         );
     }
+
 }
