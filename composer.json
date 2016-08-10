@@ -1,6 +1,7 @@
 {
   "name": "project-a/phantom-pdf",
   "description": "",
+  "license": "MIT",
   "keywords": [
     "phantom.js", "pdf"
   ],
