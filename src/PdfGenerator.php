@@ -211,7 +211,7 @@ class PdfGenerator
         $process->run();
         $error = $process->getErrorOutput();
 
-        if ($error !== null) {
+        if (!empty($error)) {
             throw new PhantomPdfException($error . ' ' . $process->getExitCodeText());
         }
     }
